@@ -37,7 +37,7 @@ def parse_arguments(arguments):
         return '', f'out("eax") eax'
 
     fn_arguments, asm_arguments, asm_pushes = [], [], []
-    for idx, argument in reversed(list(enumerate(arguments))):
+    for idx, argument in enumerate(arguments):
         fn_arguments.append(
             f'{argument["name"]}: {argument["type"]}'
         )
@@ -49,7 +49,7 @@ def parse_arguments(arguments):
             asm_arguments.append(f'in("ecx") {argument["name"]}')
         else:
             asm_pushes.append(f'push {{{argument["name"]}}}')
-            asm_arguments.append(f'{argument["name"]} = in(reg) {argument["name"]}')
+            asm_arguments.insert(0, f'{argument["name"]} = in(reg) {argument["name"]}')
     return ', '.join(fn_arguments), ', '.join(asm_arguments), ', '.join(map(lambda x: f'"{x}"', asm_pushes)) \
                                                               + ',' if asm_pushes else ''
 
