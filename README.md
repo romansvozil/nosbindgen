@@ -4,13 +4,17 @@ Simple utility for generating Rust bindings for Nostale. Is it useful? Maybe
 
 ### Example config.yaml:
 ```yaml
-- name: StrFromLStr
-  pattern: '31 c9 85 d2 74 ? 8b 4a ? e9'
+- name: 'walk'
+  pattern: '55 8B EC 0x83 C4 EC 53 56 57 66 89 4D FA'
   arguments:
-      - name: 'destination'
-        type: '*mut c_void'
-      - name: lstr
-        type: '*const c_void'
+    - name: pmanager
+      type: '*mut c_void'
+    - name: position
+      type: 'u32'
+    - name: unknown1
+      type: u32
+    - name: unknown2
+      type: u32
 ```
 
 ```shell script
