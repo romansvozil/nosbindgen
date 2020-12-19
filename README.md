@@ -19,11 +19,11 @@ python bindgen.py --exe NostaleClientX.exe --conf config.yaml --out bindings.rs
 
 ## Result bindings.rs:
 ```rust
-pub fn StrFromLStr(lstr: *const c_void, destination: *mut c_void) -> u32 { 
-    let mut eax = destination as u32;
-    unsafe { asm! { 
+pub fn walk(unknown2: u32, unknown1: u32, position: u32, pmanager: *mut c_void) -> u32 { 
+    let mut eax = pmanager as u32;
+    unsafe { asm! { "push {unknown2}",
         "call {fn}",
-        fn = in(reg) 0x4059e0, in("edx") lstr, inout("eax") eax
+        fn = in(reg) 0x53d868, unknown2 = in(reg) unknown2, in("ecx") unknown1, in("edx") position, inout("eax") eax
     } };
     eax
 }
