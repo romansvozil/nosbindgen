@@ -1,5 +1,5 @@
 # nosbindgen
-Automaticaly creates Rust bindings from patterns for Nostale.
+Simple utility for generating Rust bindings for Nostale. Is it useful? Maybe
 
 
 ### Example config.yaml:
