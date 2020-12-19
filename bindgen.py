@@ -3,6 +3,10 @@ from typing import List, Optional
 import pefile
 import yaml
 import argparse
+import logging
+
+
+logging.basicConfig(level=logging.INFO)
 
 
 def find_entry_point_section(pe, eop_rva):
@@ -68,9 +72,9 @@ def main():
     with open(config_file, 'r') as f:
         config = yaml.safe_load(f)
 
-    print(f"[INFO]    Input:  {input}.")
-    print(f"[INFO]    Output: {output}.")
-    print(f"[INFO]    Config: {config_file}")
+    logging.info(f"\tInput:  {input}.")
+    logging.info(f"\tOutput: {output}.")
+    logging.info(f"\tConfig: {config_file}")
     output = open(output, 'w')
 
     pe = pefile.PE(input, fast_load=True)
@@ -79,18 +83,28 @@ def main():
     if not code_section:
         return
 
-    for idx, function in enumerate(config):
+    found = []
+
+    for imp in config['imports']:
+        output.write(f'use {imp};\n')
+    output.write('\n')
+
+    for idx, function in enumerate(config['functions']):
         fn_name = function['name']
         fn_pattern = function['pattern']
         args, asm_args, pushes = parse_arguments(function.get('arguments', []))
 
-        print(f"[INFO]    Looking for pattern [{idx}]")
+        logging.info(f"\tLooking for pattern [{idx}]")
         res = pattern_search(code_section.get_data(), pattern_to_bytes(fn_pattern))
         if res:
             if len(res) > 1:
-                print(f"[WARNING] Pattern was found more than once for pattern [{idx}]!")
+                logging.warning(f"\tPattern was found more than once for pattern [{idx}]!")
                 for occurrence in res:
-                    print(f"\t- {hex(occurrence + 0x401000)}")
+                    logging.warning(f"\t\t- {hex(occurrence + 0x401000)}")
+            for address in res:
+                if address in found:
+                    logging.warning(f'\rAddress already found with another pattern: {address + 0x401000} [{idx}]')
+                found.append(address)
             output.write(f"""pub fn {fn_name}({args}) -> u32 {{ 
     let mut eax = {function['arguments'][0]['name'] if args else '0'} as u32;
     unsafe {{ asm! {{ {pushes}
@@ -101,12 +115,12 @@ def main():
 }}
 
 """)
-            print(f'[INFO]    Found exactly one occurrence for pattern [{idx}] on address: {hex(res[0] + 0x401000)}!')
+            logging.info(f'\tFound exactly one occurrence for pattern [{idx}] on address: {hex(res[0] + 0x401000)}!')
         else:
-            print(f"[WARNING] Pattern [{0}] was not found!")
+            logging.warning(f"\tPattern [{0}] was not found!")
 
     output.close()
-    print("[INFO]    Done!")
+    logging.info(f'\tDone!')
 
 
 if __name__ == '__main__':
