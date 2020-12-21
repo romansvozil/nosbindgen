@@ -105,7 +105,8 @@ def main():
                 if address in found:
                     logging.warning(f'\rAddress already found with another pattern: {address + 0x401000} [{idx}]')
                 found.append(address)
-            output.write(f"""pub fn {fn_name}({args}) -> u32 {{ 
+            output.write(f"""#[inline(never)]
+pub fn {fn_name}({args}) -> u32 {{ 
     let mut eax = {function['arguments'][0]['name'] if args else '0'} as u32;
     unsafe {{ asm! {{ {pushes}
         "call {{fn}}",
